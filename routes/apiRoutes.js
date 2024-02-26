@@ -1,15 +1,29 @@
 const router = require('express').Router();
-const fs = require('fs');
-const fileName = '../db/db.json';
+const store = require('../db/store');
 
+// GET "/api/notes" responds with all notes from the database
 router.get('/notes', (req, res) => {
-    const data = fs.readFileSync(fileName, 'utf8');
-    const parseData = JSON.parse(data);
-    res.status(200).json(parseData);
+  store
+    .getNotes()
+    .then((notes) => {
+      return res.json(notes);
+    })
+    .catch((err) => res.status(500).json(err));
 });
 
 router.post('/notes', (req, res) => {
-    res.json('success');
+  store
+    .addNote(req.body)
+    .then((note) => res.json(note))
+    .catch((err) => res.status(500).json(err));
+});
+
+// DELETE "/api/notes" deletes the note with an id equal to req.params.id
+router.delete('/notes/:id', (req, res) => {
+  store
+    .removeNote(req.params.id)
+    .then(() => res.json({ ok: true }))
+    .catch((err) => res.status(500).json(err));
 });
 
 module.exports = router;
